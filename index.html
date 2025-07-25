@@ -196,32 +196,6 @@
       background: #ffd700;
     }
 
-    .calculate-btn {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(45deg, #ffd700, #ffed4e);
-      color: #1a1a1a;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .calculate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-      background: linear-gradient(45deg, #ffed4e, #ffd700);
-    }
-
-    .calculate-btn:active {
-      transform: translateY(0);
-    }
-
     .result {
       background: linear-gradient(135deg, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.9));
       border-radius: 15px;
@@ -269,6 +243,23 @@
       gap: 20px;
     }
 
+    .auto-calc-hint {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #ffd700;
+      font-style: italic;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 20px;
@@ -313,6 +304,10 @@
   
   <div class="container">
     <h1>🧪 Lifeforce Flip Calculator</h1>
+
+    <div class="auto-calc-hint">
+      ⚡ Расчет происходит автоматически при заполнении полей
+    </div>
 
     <div class="section">
       <h3>💰 Мой бюджет</h3>
@@ -398,12 +393,10 @@
       </div>
     </div>
 
-    <button class="calculate-btn" onclick="calculate()">📈 Рассчитать стратегию</button>
-
     <div class="result">
       <h3>📊 Результат анализа:</h3>
       <div id="result" class="result-content">
-        Заполните поля выше и нажмите кнопку для расчета прибыльности сделки...
+        Заполните поля выше для автоматического расчета прибыльности сделки...
       </div>
     </div>
   </div>
@@ -459,6 +452,9 @@
           chaosElements.forEach(el => el.style.display = 'none');
           divineElements.forEach(el => el.style.display = el.tagName === 'LABEL' ? 'flex' : 'block');
         }
+
+        // Пересчитываем при смене типа прибыли
+        calculate();
       });
     });
 
@@ -473,9 +469,10 @@
       const totalJuiceAmount = juiceAmount * stackCount;
       const juicePerDivine = parseFloat(document.getElementById("juicePerDivine").value) || 1;
 
+      // Если не заполнены основные поля, показываем подсказку
       if (juiceAmount <= 0 || juiceCost <= 0 || stackCount <= 0 || juicePerDivine <= 0 || divRate <= 0) {
         document.getElementById("result").innerHTML = 
-          `<div class="warning">⚠️ Пожалуйста, заполните все обязательные поля корректными значениями!</div>`;
+          `<div style="color: #ccc; font-style: italic;">Заполните все поля для автоматического расчета...</div>`;
         return;
       }
 
@@ -529,19 +526,14 @@
       document.getElementById("result").innerHTML = result;
     }
 
-    // Автоматический расчет при вводе
+    // Автоматический расчет при вводе любых данных
     document.querySelectorAll('input[type="number"], input[type="radio"]').forEach(input => {
-      input.addEventListener('input', () => {
-        const juiceAmount = document.getElementById("juiceAmount").value;
-        const juiceCost = document.getElementById("juiceCost").value;
-        const stackCount = document.getElementById("stackCount").value;
-        const juicePerDivine = document.getElementById("juicePerDivine").value;
-        
-        if (juiceAmount && juiceCost && stackCount && juicePerDivine) {
-          calculate();
-        }
-      });
+      input.addEventListener('input', calculate);
+      input.addEventListener('change', calculate);
     });
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', calculate);
   </script>
 </body>
 </html>
