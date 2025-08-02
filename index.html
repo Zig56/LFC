@@ -381,6 +381,8 @@
         <label id="divineTargetLabel" style="display:none;">💎 Желаемая прибыль в divines:</label>
         <input type="number" id="divineTarget" style="display:none;" placeholder="Целевая прибыль">
       </div>
+
+
     </div>
 
     <div class="result">
@@ -467,6 +469,8 @@
         }
       }
 
+
+
       // Используем рекомендованное количество стаков для расчета
       const stackCount = recommendedStacks;
       const totalCost = juiceCost * stackCount;
@@ -480,7 +484,6 @@
 
       let result = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-          <div>📦 <strong>Рекомендуемо стаков:</strong><br><span class="highlight">${stackCount}</span> шт.</div>
           <div>💰 <strong>Общие затраты:</strong><br><span class="highlight">${totalCost}</span> хаосов</div>
           <div>📦 <strong>Всего жижи:</strong><br><span class="highlight">${totalJuiceAmount}</span> ед.</div>
           <div>📈 <strong>Чистая прибыль:</strong><br><span class="highlight">${cleanProfit}</span> хаосов</div>
@@ -489,8 +492,6 @@
           <div>📦 <strong>Остаток жижи:</strong><br><span class="highlight">${leftoverJuice}</span> ед.</div>
         </div>
       `;
-
-
 
       if (totalChaos < totalCost) {
         result += `<div class="warning">💸 Внимание! Недостаточно средств для покупки. Нужно еще <span class="highlight">${totalCost - totalChaos}</span> хаосов</div>`;
