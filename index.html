@@ -355,16 +355,6 @@
         </div>
 
         <div class="input-group">
-          <label>📦 Количество стаков:</label>
-          <input type="number" id="stackCount" placeholder="Сколько стаков покупаю" min="1" value="1">
-        </div>
-
-        <div class="input-group">
-          <label>💰 Общая сумма покупки:</label>
-          <input type="number" id="totalCost" placeholder="Автоматически рассчитается" readonly>
-        </div>
-
-        <div class="input-group">
           <label>📦 Продаю: # жижи за 1 диван</label>
           <input type="number" id="juicePerDivine" placeholder="Жижи за диван">
         </div>
@@ -420,19 +410,6 @@
 
     createParticles();
 
-    // Функция для автоматического расчета общей суммы
-    function updateTotalCost() {
-      const juiceCost = parseFloat(document.getElementById("juiceCost").value) || 0;
-      const stackCount = parseFloat(document.getElementById("stackCount").value) || 1;
-      const totalCost = juiceCost * stackCount;
-      
-      document.getElementById("totalCost").value = totalCost > 0 ? totalCost : '';
-    }
-
-    // Обработчики для автоматического расчета общей суммы
-    document.getElementById("juiceCost").addEventListener('input', updateTotalCost);
-    document.getElementById("stackCount").addEventListener('input', updateTotalCost);
-
     // Переключение типа прибыли
     document.querySelectorAll('input[name="profitType"]').forEach((radio) => {
       radio.addEventListener('change', function() {
@@ -464,13 +441,10 @@
       const divRate = parseFloat(document.getElementById("divRate").value) || 205;
       const juiceAmount = parseFloat(document.getElementById("juiceAmount").value) || 0;
       const juiceCost = parseFloat(document.getElementById("juiceCost").value) || 0;
-      const stackCount = parseFloat(document.getElementById("stackCount").value) || 1;
-      const totalCost = juiceCost * stackCount;
-      const totalJuiceAmount = juiceAmount * stackCount;
       const juicePerDivine = parseFloat(document.getElementById("juicePerDivine").value) || 1;
 
       // Если не заполнены основные поля, показываем подсказку
-      if (juiceAmount <= 0 || juiceCost <= 0 || stackCount <= 0 || juicePerDivine <= 0 || divRate <= 0) {
+      if (juiceAmount <= 0 || juiceCost <= 0 || juicePerDivine <= 0 || divRate <= 0) {
         document.getElementById("result").innerHTML = 
           `<div style="color: #ccc; font-style: italic;">Заполните все поля для автоматического расчета...</div>`;
         return;
@@ -483,6 +457,21 @@
         ? parseFloat(document.getElementById("chaosTarget").value) || 0 
         : (parseFloat(document.getElementById("divineTarget").value) || 0) * divRate;
 
+      // Расчет для цели прибыли - сколько стаков нужно купить
+      let recommendedStacks = 1;
+      if (chaosTarget > 0) {
+        // Прибыль с одного стака
+        const profitPerStack = (Math.floor(juiceAmount / juicePerDivine) * divRate) - juiceCost;
+        if (profitPerStack > 0) {
+          recommendedStacks = Math.ceil(chaosTarget / profitPerStack);
+        }
+      }
+
+      // Используем рекомендованное количество стаков для расчета
+      const stackCount = recommendedStacks;
+      const totalCost = juiceCost * stackCount;
+      const totalJuiceAmount = juiceAmount * stackCount;
+
       const divineReceived = Math.floor(totalJuiceAmount / juicePerDivine);
       const chaosReceived = divineReceived * divRate;
       const cleanProfit = chaosReceived - totalCost;
@@ -491,6 +480,7 @@
 
       let result = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <div>📦 <strong>Рекомендуемо стаков:</strong><br><span class="highlight">${stackCount}</span> шт.</div>
           <div>💰 <strong>Общие затраты:</strong><br><span class="highlight">${totalCost}</span> хаосов</div>
           <div>📦 <strong>Всего жижи:</strong><br><span class="highlight">${totalJuiceAmount}</span> ед.</div>
           <div>📈 <strong>Чистая прибыль:</strong><br><span class="highlight">${cleanProfit}</span> хаосов</div>
@@ -500,24 +490,7 @@
         </div>
       `;
 
-      if (cleanProfit >= chaosTarget && chaosTarget > 0) {
-        result += `<div class="success">🏆 Поздравляю! Цель достигнута!</div>`;
-      } else if (chaosTarget > 0) {
-        const missing = chaosTarget - cleanProfit;
-        const extraDivinesNeeded = Math.ceil(missing / divRate);
-        const extraJuiceNeeded = extraDivinesNeeded * juicePerDivine;
-        const extraCost = ((extraJuiceNeeded / totalJuiceAmount) * totalCost).toFixed(0);
-        
-        result += `
-          <div class="warning">⚠️ Цель прибыли не достигнута</div>
-          <div style="margin-top: 15px;">
-            <strong>💡 Рекомендации:</strong><br>
-            • Докупить <span class="highlight">${extraJuiceNeeded}</span> жижи<br>
-            • Дополнительные затраты: <span class="highlight">${extraCost}</span> хаосов<br>
-            • Это даст еще <span class="highlight">${extraDivinesNeeded}</span> диванов
-          </div>
-        `;
-      }
+
 
       if (totalChaos < totalCost) {
         result += `<div class="warning">💸 Внимание! Недостаточно средств для покупки. Нужно еще <span class="highlight">${totalCost - totalChaos}</span> хаосов</div>`;
